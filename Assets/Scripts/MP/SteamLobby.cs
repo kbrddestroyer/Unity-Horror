@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,7 +31,11 @@ public class SteamLobby : MonoBehaviour
             Steamworks.InteropHelp.TestIfAvailableClient();
         } catch (Exception e)
         {
-            Debug.LogWarning("Steam Lobby Error! " + e.Message);
+            Debug.LogError("Steam Lobby Error! " + e.Message);
+            if (!File.Exists("crash_log.txt")) File.Create("crash_log.txt");
+            
+            File.AppendAllText("crash_log.txt", DateTime.Now.ToString() + " : " + e.Message + '\n');
+            return;
         }
         LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
         JoinRequest = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);
