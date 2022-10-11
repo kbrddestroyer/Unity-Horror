@@ -87,6 +87,7 @@ public class Player : NetworkBehaviour
 
     void Update()               // Basic movement control
     {
+        CmdUpdateRotation(transform.rotation);
         if (hasAuthority)
         {
             float new_x = Input.GetAxis("Mouse X") * msens;
@@ -97,7 +98,6 @@ public class Player : NetworkBehaviour
             rotation.x = Mathf.Clamp(rotation.x, -89f, 89f);
             
             this.transform.rotation = Quaternion.Euler(0, rotation.y, 0);
-            CmdUpdateRotation(transform.rotation);
             mainCamera.transform.rotation = Quaternion.Euler(rotation.x, rotation.y, 0);
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
