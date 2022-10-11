@@ -79,6 +79,12 @@ public class Player : NetworkBehaviour
         }
     }
 
+    [Command] 
+    void CmdUpdateRotation(Quaternion rotation)
+    {
+        this.transform.rotation = rotation;
+    }
+
     void Update()               // Basic movement control
     {
         if (hasAuthority)
@@ -91,6 +97,7 @@ public class Player : NetworkBehaviour
             rotation.x = Mathf.Clamp(rotation.x, -89f, 89f);
             
             this.transform.rotation = Quaternion.Euler(0, rotation.y, 0);
+            CmdUpdateRotation(transform.rotation);
             mainCamera.transform.rotation = Quaternion.Euler(rotation.x, rotation.y, 0);
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
