@@ -11,6 +11,7 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar] public int PlayerIDNumber;
     [SyncVar] public ulong PlayerSteamID;
     [SyncVar(hook = nameof(PlayerNameUpdate))] public string PlayerName;
+    [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool Ready;
 
     private CustomNetworkManager manager;
     public CustomNetworkManager Manager {
@@ -20,9 +21,24 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
+    private void Start()
+    {
+        DontDestroyOnLoad(this.gameObject);
+    }
+
+    public void CanStartGame(string sceneName)
+    {
+        if (hasAuthority)
+            CmdCanStartGame(sceneName);
+    }
+
+    [Command] public void CmdCanStartGame(string sceneName)
+    {
+        manager.StartGame(sceneName);
+    }
+
     public override void OnStartAuthority()
     {
-        Debug.LogWarning("OnStartAuthority");
         CmdSetPlayerName(SteamFriends.GetPersonaName().ToString());
         gameObject.name = "LocalGamePlayer";
         LobbyController.instance.FindLocalPlayer();
@@ -31,8 +47,6 @@ public class PlayerObjectController : NetworkBehaviour
 
     public override void OnStartClient()
     {
-        Debug.LogWarning("OnStartClient");
-
         Manager.players.Add(this);
         LobbyController.instance.UpdateLobbyName();
         LobbyController.instance.UpdateLobbyPlayers();
@@ -44,9 +58,9 @@ public class PlayerObjectController : NetworkBehaviour
         LobbyController.instance.UpdateLobbyPlayers();
     }
     
-    [Command] private void CmdSetPlayerName(string PlayerName)
+    [Command] private void CmdSetPlayerName(string Name)
     {
-        this.PlayerNameUpdate(this.PlayerName, PlayerName);
+        this.PlayerNameUpdate(this.PlayerName, Name);
     }
 
     public void PlayerNameUpdate(string old_, string new_)
@@ -58,6 +72,31 @@ public class PlayerObjectController : NetworkBehaviour
         if (isClient)
         {
             LobbyController.instance.UpdateLobbyPlayers();
+        }
+    }
+
+    private void PlayerReadyUpdate(bool old_, bool new_)
+    {
+        if (isServer)
+        {
+            this.Ready = new_;
+        }
+        if (isClient)
+        {
+            LobbyController.instance.UpdatePlayerItem();
+        }
+    }
+
+    [Command] private void CmdSetPlayerReady()
+    {
+        this.PlayerReadyUpdate(this.Ready, !this.Ready);
+    }
+
+    public void ToggleReady()
+    {
+        if (hasAuthority)
+        {
+            CmdSetPlayerReady();
         }
     }
 }

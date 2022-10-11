@@ -15,10 +15,15 @@ public class CustomNetworkManager : NetworkManager
         if (SceneManager.GetActiveScene().name == "Lobby")
         {
             PlayerObjectController current_player = Instantiate(playerObjectController);
-            playerObjectController.ConnectionID = conn.connectionId;
-            playerObjectController.PlayerIDNumber = players.Count + 1;
-            playerObjectController.PlayerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex((CSteamID)SteamLobby.instance.CurrentLobbyID, players.Count);
+            current_player.ConnectionID = conn.connectionId;
+            current_player.PlayerIDNumber = players.Count + 1;
+            current_player.PlayerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex((CSteamID)SteamLobby.instance.CurrentLobbyID, players.Count);
             NetworkServer.AddPlayerForConnection(conn, current_player.gameObject);
         }
+    }
+
+    public void StartGame(string sceneName)
+    {
+        ServerChangeScene(sceneName);
     }
 }

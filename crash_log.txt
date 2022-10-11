@@ -2,3 +2,114 @@ Crashed due to steamworks error
 Steamworks is not initialized.
 Crashed due to steamworks error
 Steamworks is not initialized.
+06.10.2022 21:53:46 : Steamworks is not initialized.
+06.10.2022 21:53:51 : Host button pressed. Awaiting changes...
+06.10.2022 21:53:52 : Host button pressed. Awaiting changes...
+06.10.2022 21:53:53 : Host button pressed. Awaiting changes...
+06.10.2022 21:53:53 : Host button pressed. Awaiting changes...
+06.10.2022 21:54:09 : Steamworks is not initialized.
+06.10.2022 21:54:10 : Host button pressed. Awaiting changes...
+06.10.2022 21:54:11 : Host button pressed. Awaiting changes...
+06.10.2022 21:54:11 : Host button pressed. Awaiting changes...
+06.10.2022 21:54:21 : Steamworks is not initialized.
+06.10.2022 21:54:23 : Host button pressed. Awaiting changes...
+06.10.2022 21:54:24 : Host button pressed. Awaiting changes...
+06.10.2022 21:54:24 : Host button pressed. Awaiting changes...
+06.10.2022 21:54:30 : Steamworks is not initialized.
+06.10.2022 21:54:33 : Host button pressed. Awaiting changes...
+06.10.2022 21:54:33 : Host button pressed. Awaiting changes...
+06.10.2022 21:54:33 : Host button pressed. Awaiting changes...
+06.10.2022 21:55:06 : Steamworks is not initialized.
+06.10.2022 21:55:09 : Host button pressed. Awaiting changes...
+06.10.2022 21:55:10 : Host button pressed. Awaiting changes...
+06.10.2022 21:55:10 : Host button pressed. Awaiting changes...
+06.10.2022 21:55:10 : Host button pressed. Awaiting changes...
+06.10.2022 21:55:11 : Host button pressed. Awaiting changes...
+06.10.2022 21:57:29 : Host button pressed. Awaiting changes...
+06.10.2022 21:58:02 : Host button pressed. Awaiting changes...
+06.10.2022 22:48:59 : Steamworks is not initialized.
+06.10.2022 23:00:13 : Steamworks is not initialized.
+06.10.2022 23:10:41 : Steamworks is not initialized.
+06.10.2022 23:16:08 : Steamworks is not initialized.
+06.10.2022 23:17:47 : Steamworks is not initialized.
+06.10.2022 23:18:13 : Steamworks is not initialized.
+06.10.2022 23:19:42 : Steamworks is not initialized.
+06.10.2022 23:20:03 : Steamworks is not initialized.
+06.10.2022 23:22:19 : Steamworks is not initialized.
+06.10.2022 23:22:43 : Steamworks is not initialized.
+06.10.2022 23:23:45 : Steamworks is not initialized.
+06.10.2022 23:24:29 : Steamworks is not initialized.
+06.10.2022 23:30:31 : Steamworks is not initialized.
+06.10.2022 23:31:12 : Steamworks is not initialized.
+06.10.2022 23:31:21 : Steamworks is not initialized.
+06.10.2022 23:35:40 : Steamworks is not initialized.
+06.10.2022 23:36:25 : Steamworks is not initialized.
+06.10.2022 23:37:03 : Steamworks is not initialized.
+06.10.2022 23:37:47 : Steamworks is not initialized.
+06.10.2022 23:38:06 : Steamworks is not initialized.
+06.10.2022 23:45:37 : Steamworks is not initialized.
+06.10.2022 23:48:15 : Steamworks is not initialized.
+06.10.2022 23:48:24 : Steamworks is not initialized.
+06.10.2022 23:48:38 : Steamworks is not initialized.
+06.10.2022 23:51:03 : Steamworks is not initialized.
+06.10.2022 23:54:17 : Steamworks is not initialized.
+06.10.2022 23:54:27 : Steamworks is not initialized.
+06.10.2022 23:57:49 : Steamworks is not initialized.
+06.10.2022 23:58:03 : Steamworks is not initialized.
+07.10.2022 0:00:48 : Steamworks is not initialized.
+07.10.2022 0:10:33 : Steamworks is not initialized.
+07.10.2022 0:14:40 : Steamworks is not initialized.
+07.10.2022 0:14:47 : Steamworks is not initialized.
+07.10.2022 0:18:21 : Steamworks is not initialized.
+07.10.2022 0:21:43 : Steamworks is not initialized.
+07.10.2022 0:21:52 : Steamworks is not initialized.
+07.10.2022 0:24:16 : Steamworks is not initialized.
+07.10.2022 0:25:04 : Steamworks is not initialized.
+07.10.2022 0:25:41 : Steamworks is not initialized.
+07.10.2022 0:28:44 : Steamworks is not initialized.
+07.10.2022 0:32:16 : Steamworks is not initialized.
+07.10.2022 0:32:29 : Steamworks is not initialized.
+07.10.2022 0:35:31 : Steamworks is not initialized.
+07.10.2022 0:36:13 : Steamworks is not initialized.
+07.10.2022 0:36:34 : Steamworks is not initialized.
+07.10.2022 0:37:42 : Steamworks is not initialized.
+07.10.2022 0:38:03 : Steamworks is not initialized.
+07.10.2022 0:38:36 : Steamworks is not initialized.
+07.10.2022 0:38:45 : Steamworks is not initialized.
+07.10.2022 0:41:15 : Steamworks is not initialized.
+07.10.2022 0:42:01 : Steamworks is not initialized.
+07.10.2022 0:45:41 : Steamworks is not initialized.
+07.10.2022 0:45:56 : Steamworks is not initialized.
+07.10.2022 0:46:59 : Steamworks is not initialized.
+07.10.2022 0:48:17 : Steamworks is not initialized.
+07.10.2022 11:58:29 : Steamworks is not initialized.
+07.10.2022 11:58:30 : SteamAPI.Init() failed either!
+07.10.2022 11:58:33 : Steamworks is not initialized.
+07.10.2022 12:50:49 : Steamworks is not initialized.
+07.10.2022 14:26:56 : Steamworks is not initialized.
+07.10.2022 14:29:05 : Steamworks is not initialized.
+07.10.2022 14:30:07 : Steamworks is not initialized.
+07.10.2022 14:34:28 : Steamworks is not initialized.
+07.10.2022 14:36:40 : Steamworks is not initialized.
+07.10.2022 14:41:51 : Steamworks is not initialized.
+07.10.2022 14:50:45 : Steamworks is not initialized.
+07.10.2022 14:52:26 : Steamworks is not initialized.
+10.10.2022 13:13:57 : Steamworks is not initialized.
+10.10.2022 13:13:57 : SteamAPI.Init() failed either!
+10.10.2022 13:14:00 : Steamworks is not initialized.
+10.10.2022 13:14:02 : Steamworks is not initialized.
+10.10.2022 13:25:19 : Steamworks is not initialized.
+10.10.2022 14:02:53 : Steamworks is not initialized.
+10.10.2022 14:03:40 : Steamworks is not initialized.
+10.10.2022 14:04:45 : Steamworks is not initialized.
+10.10.2022 14:06:16 : Steamworks is not initialized.
+10.10.2022 14:10:10 : Steamworks is not initialized.
+10.10.2022 14:12:52 : Steamworks is not initialized.
+10.10.2022 14:13:08 : Steamworks is not initialized.
+10.10.2022 14:13:27 : Steamworks is not initialized.
+10.10.2022 14:13:42 : Steamworks is not initialized.
+10.10.2022 14:27:39 : Steamworks is not initialized.
+10.10.2022 14:31:30 : Steamworks is not initialized.
+10.10.2022 14:34:24 : Steamworks is not initialized.
+11.10.2022 13:26:42 : Steamworks is not initialized.
+11.10.2022 13:26:45 : Steamworks is not initialized.

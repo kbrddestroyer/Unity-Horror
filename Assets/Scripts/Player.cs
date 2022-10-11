@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class Player : MonoBehaviour
+using UnityEngine.SceneManagement;
+using Mirror;
+
+public class Player : NetworkBehaviour
 {
     [Header("Base Settings")]
     [SerializeField, Range(0f, 10f)]    private float       speed;              // Standart oving speed
@@ -13,8 +16,8 @@ public class Player : MonoBehaviour
     [SerializeField]                    private new Light   light;              // Attached flashlight
     [SerializeField]                    private AudioClip   footsteps;          // Step sound
     [SerializeField]                    private GameObject  ragdoll;
+    [SerializeField]                    private Camera      mainCamera;         // Camera.main link
     //---   PUBLIC VARIABLES    ---//
-
     public Transform    targetPoint;                                            // Root point for Rig Animation 
     public float        mind = 1.0f;                                            // Parameter for anomalies (heal point)
     public bool alive = true;
@@ -26,7 +29,6 @@ public class Player : MonoBehaviour
     private float       normalHeight;                                           // Peak point in normal state
     private AudioSource audioSource;                                            // AudioSource component
     private Animator    animator;                                               // Animator component
-    private Camera      mainCamera;                                             // Camera.main link
     private Vector3     rotation;                                               // Base rotation
 
     public void Die()
@@ -45,7 +47,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void OnEnable()
     {
         Cursor.lockState = CursorLockMode.Locked;                               // Lock cursor
         Cursor.visible = false;                                                 // Hide cursor
@@ -54,9 +56,9 @@ public class Player : MonoBehaviour
 
         animator = GetComponent<Animator>();                                    // Get animator
         audioSource = GetComponent<AudioSource>();                              // Get audioSource
-        mainCamera = Camera.main;                                               // Get mainCamera
         normalHeight = mainCamera.transform.localPosition.y;                    // Get normalHeight
     }
+
     private IEnumerator Footsteps() //< Play footstep sound >
     {
         audioSource.clip = footsteps;
@@ -67,52 +69,57 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()  // Translating camera w/ crouching
     {
-        if (crouching)
+        if (hasAuthority)
         {
-            mainCamera.transform.localPosition = Vector3.Lerp(mainCamera.transform.localPosition, new Vector3(mainCamera.transform.localPosition.x, crouchHeight, mainCamera.transform.localPosition.z), crouchSpeed * Time.deltaTime);
+            if (crouching)
+            {
+                mainCamera.transform.localPosition = Vector3.Lerp(mainCamera.transform.localPosition, new Vector3(mainCamera.transform.localPosition.x, crouchHeight, mainCamera.transform.localPosition.z), crouchSpeed * Time.deltaTime);
+            }
+            else mainCamera.transform.localPosition = Vector3.Lerp(mainCamera.transform.localPosition, new Vector3(mainCamera.transform.localPosition.x, normalHeight, mainCamera.transform.localPosition.z), crouchSpeed * Time.deltaTime);
         }
-        else mainCamera.transform.localPosition = Vector3.Lerp(mainCamera.transform.localPosition, new Vector3(mainCamera.transform.localPosition.x, normalHeight, mainCamera.transform.localPosition.z), crouchSpeed * Time.deltaTime);
     }
 
     void Update()               // Basic movement control
     {
-        float new_x = Input.GetAxis("Mouse X") * msens;
-        float new_y = Input.GetAxis("Mouse Y") * msens;
-
-        rotation.x -= new_y;
-        rotation.y += new_x;
-        rotation.x = Mathf.Clamp(rotation.x, -89f, 89f);
-
-        transform.rotation = Quaternion.Euler(0, rotation.y, 0);
-        Camera.main.transform.rotation = Quaternion.Euler(rotation.x, rotation.y, 0);
-
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (hasAuthority)
         {
-            running = true;
-            crouching = false;
-            mainCamera.transform.localPosition = new Vector3(mainCamera.transform.localPosition.x, normalHeight, mainCamera.transform.localPosition.z);
+            float new_x = Input.GetAxis("Mouse X") * msens;
+            float new_y = Input.GetAxis("Mouse Y") * msens;
+
+            rotation.x -= new_y;
+            rotation.y += new_x;
+            rotation.x = Mathf.Clamp(rotation.x, -89f, 89f);
+            
+            this.transform.rotation = Quaternion.Euler(0, rotation.y, 0);
+            mainCamera.transform.rotation = Quaternion.Euler(rotation.x, rotation.y, 0);
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                running = true;
+                crouching = false;
+                mainCamera.transform.localPosition = new Vector3(mainCamera.transform.localPosition.x, normalHeight, mainCamera.transform.localPosition.z);
+            }
+            if (Input.GetKeyUp(KeyCode.LeftShift)) running = false;
+
+            if (Input.GetKeyDown(KeyCode.T)) light.enabled = !light.enabled;
+
+            if (Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                crouching = !crouching;
+            }
+
+            transform.Translate(new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")) * ((running) ? run_speed : speed) * Time.deltaTime);
+
+            animator.SetFloat("speed", Input.GetAxis("Vertical") * ((running) ? run_speed : speed));
+            animator.SetFloat("side_speed", Input.GetAxis("Horizontal") * ((running) ? run_speed : speed));
+
+            if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+            {
+                if (!audioSource.isPlaying)
+                    StartCoroutine(Footsteps());
+            }
+            Ray newPositionRay = mainCamera.GetComponent<Camera>().ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
+            Vector3 newPosition = newPositionRay.origin + newPositionRay.direction * targetDistance;
+            targetPoint.position = newPosition;
         }
-        if (Input.GetKeyUp(KeyCode.LeftShift)) running = false;
-
-        if (Input.GetKeyDown(KeyCode.T)) light.enabled = !light.enabled;
-
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            crouching = !crouching;
-        }
-
-        transform.Translate(new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")) * ((running) ? run_speed : speed) * Time.deltaTime);
-
-        animator.SetFloat("speed", Input.GetAxis("Vertical") * ((running) ? run_speed : speed));
-        animator.SetFloat("side_speed", Input.GetAxis("Horizontal") * ((running) ? run_speed : speed));
-
-        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
-        {
-            if (!audioSource.isPlaying)
-                StartCoroutine(Footsteps());
-        }
-        Ray newPositionRay = mainCamera.GetComponent<Camera>().ScreenPointToRay(new Vector2( Screen.width / 2, Screen.height / 2));
-        Vector3 newPosition = newPositionRay.origin + newPositionRay.direction * targetDistance;
-        targetPoint.position = newPosition;
     }
 }

@@ -28,24 +28,32 @@ public class SteamLobby : MonoBehaviour
 
         try
         {
-            Steamworks.InteropHelp.TestIfAvailableClient();
-        } catch (Exception e)
+            InteropHelp.TestIfAvailableClient();
+        }
+        catch (Exception e)
         {
-            Debug.LogError("Steam Lobby Error! " + e.Message);
-            if (!File.Exists("crash_log.txt")) File.Create("crash_log.txt");
-            
-            File.AppendAllText("crash_log.txt", DateTime.Now.ToString() + " : " + e.Message + '\n');
-            return;
+            if (!SteamAPI.Init())
+            {
+                return;
+            }
         }
         LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
         JoinRequest = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);
         LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
-       
     }
 
     public void HostLobby()
     {
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, manager.maxConnections);
+        try
+        {
+            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, manager.maxConnections);
+        }
+        catch (Exception e)
+        {
+            if (!File.Exists("crash_log.txt")) File.Create("crash_log.txt");
+
+            File.AppendAllText("crash_log.txt", DateTime.Now.ToString() + " : " + e.Message + '\n');
+        }
     }
 
     private void OnLobbyCreated(LobbyCreated_t callback)
