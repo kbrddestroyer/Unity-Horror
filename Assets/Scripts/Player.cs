@@ -17,9 +17,9 @@ public class Player : NetworkBehaviour
     [SerializeField]                    private AudioClip   footsteps;          // Step sound
     [SerializeField]                    private GameObject  ragdoll;
     [SerializeField]                    private Camera      mainCamera;         // Camera.main link
+    [SerializeField] private SkinnedMeshRenderer mesh;
     //---   PUBLIC VARIABLES    ---//
     public Transform    targetPoint;                                            // Root point for Rig Animation 
-    public float        mind = 1.0f;                                            // Parameter for anomalies (heal point)
     public bool alive = true;
     //---   PRIVATE VARIABLES   ---//
     private const float seconds = 0.5f;                                         // Footsteps sound delay (normal)
@@ -31,11 +31,27 @@ public class Player : NetworkBehaviour
     private Animator    animator;                                               // Animator component
     private Vector3     rotation;                                               // Base rotation
 
+    [SyncVar(hook = nameof(ChangeLightState))] private bool light_state = false;
+    [SyncVar] public float mind = 1.0f;                                         // Parameter for anomalies (heal point)
+    [SyncVar] private bool isPlaying = false;
+
+    [Command]
+    private void CmdChangeLightState()
+    {
+        ChangeLightState(light_state, !light_state);
+    }
+
+    private void ChangeLightState(bool old_, bool new_)
+    {
+        light_state = new_;
+    }
+
+    [ClientRpc]
     public void Die()
     {
         Instantiate(ragdoll, transform).transform.parent = null;
-        GetComponentInChildren<SkinnedMeshRenderer>().enabled = false;
-        mainCamera.GetComponent<Effects>().enabled = true;
+        mesh.enabled = false;
+        mainCamera.transform.Find("PostProcess").GetComponent<Collider>().enabled = true;
         alive = false;
     }
 
@@ -45,6 +61,8 @@ public class Player : NetworkBehaviour
         {
             Physics.IgnoreCollision(this.GetComponent<Collider>(), collision.collider);
         }
+        else if (collision.gameObject.tag == "Door" && !alive)
+            Physics.IgnoreCollision(this.GetComponent<Collider>(), collision.collider);
     }
 
     private void OnEnable()
@@ -59,12 +77,36 @@ public class Player : NetworkBehaviour
         normalHeight = mainCamera.transform.localPosition.y;                    // Get normalHeight
     }
 
+    [Command]
+    private void CmdPlayStepAudio()
+    {
+        RpcPlayFootstep();
+    }
+
+    [Command(requiresAuthority = false)]
+    private void CmdChangeIsPlaying(bool new_)
+    {
+        this.isPlaying = new_;
+    }
+
+    [ClientRpc]
+    private void RpcPlayFootstep()
+    {
+        StartCoroutine(Footsteps());
+    }
+
+    [ClientCallback]
     private IEnumerator Footsteps() //< Play footstep sound >
     {
-        audioSource.clip = footsteps;
-        audioSource.Play();
-        yield return new WaitForSeconds((running) ? run_seconds : seconds);
-        audioSource.Stop();
+        if (!isPlaying)
+        {
+            audioSource.clip = footsteps;
+            audioSource.Play();
+            CmdChangeIsPlaying(true);
+            yield return new WaitForSeconds((running) ? run_seconds : seconds);
+            CmdChangeIsPlaying(false);
+            audioSource.Stop();
+        }
     }
 
     private void FixedUpdate()  // Translating camera w/ crouching
@@ -79,15 +121,8 @@ public class Player : NetworkBehaviour
         }
     }
 
-    [Command] 
-    void CmdUpdateRotation(Quaternion rotation)
-    {
-        this.transform.rotation = rotation;
-    }
-
     void Update()               // Basic movement control
     {
-        CmdUpdateRotation(transform.rotation);
         if (hasAuthority)
         {
             float new_x = Input.GetAxis("Mouse X") * msens;
@@ -107,7 +142,7 @@ public class Player : NetworkBehaviour
             }
             if (Input.GetKeyUp(KeyCode.LeftShift)) running = false;
 
-            if (Input.GetKeyDown(KeyCode.T)) light.enabled = !light.enabled;
+            if (Input.GetKeyDown(KeyCode.T)) CmdChangeLightState();
 
             if (Input.GetKeyDown(KeyCode.LeftControl))
             {
@@ -122,11 +157,14 @@ public class Player : NetworkBehaviour
             if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
             {
                 if (!audioSource.isPlaying)
-                    StartCoroutine(Footsteps());
+                    CmdPlayStepAudio();
             }
+            
             Ray newPositionRay = mainCamera.GetComponent<Camera>().ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2));
             Vector3 newPosition = newPositionRay.origin + newPositionRay.direction * targetDistance;
             targetPoint.position = newPosition;
+            targetPoint.rotation = mainCamera.transform.rotation;
         }
+        if (light.enabled != light_state) light.enabled = light_state;
     }
 }

@@ -22,22 +22,13 @@ public class PlayerMovementController : NetworkBehaviour
         SceneManager.activeSceneChanged += OnSceneChanged;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (SceneManager.GetActiveScene().name == "Level1")
+        if (hasAuthority)
         {
-            if (hasAuthority)
+            if (Input.GetKeyDown(KeyCode.F1))
             {
-                float new_x = Input.GetAxis("Mouse X") * msens;
-                float new_y = Input.GetAxis("Mouse Y") * msens;
-
-                rotation.x -= new_y;
-                rotation.y += new_x;
-                rotation.x = Mathf.Clamp(rotation.x, -89f, 89f);
-
-                transform.rotation = Quaternion.Euler(0, rotation.y, 0);
-                camera.transform.rotation = Quaternion.Euler(rotation.x, rotation.y, 0);
+                transform.position = new Vector3(0, 2, 0);
             }
         }
     }
@@ -45,8 +36,13 @@ public class PlayerMovementController : NetworkBehaviour
     private IEnumerator updateSpawn()
     {
         yield return new WaitForSeconds(0.1f);
-        this.transform.position = new Vector3(Random.Range(-9f, 9f), 1, Random.Range(-9f, 9f));
-        this.playerObject.SetActive(true);       
+
+        GameObject[] SpawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
+
+        this.transform.position = SpawnPoints[Random.Range(0, SpawnPoints.Length)].transform.position;
+        this.transform.rotation = SpawnPoints[Random.Range(0, SpawnPoints.Length)].transform.rotation;
+
+        this.playerObject.SetActive(true);
     }
 
     private void OnSceneChanged(Scene current, Scene next)
@@ -54,11 +50,11 @@ public class PlayerMovementController : NetworkBehaviour
         if (next.name == "Lobby") return;
         if (playerObject.activeSelf == false)
         {
-            Debug.LogWarning(this);
             this.playerObject.SetActive(true);
             StartCoroutine(updateSpawn());
             foreach (Behaviour b in enableOnSceneStart)
                 b.enabled = true;
+
             if (hasAuthority)
             {
                 camera.gameObject.SetActive(true);

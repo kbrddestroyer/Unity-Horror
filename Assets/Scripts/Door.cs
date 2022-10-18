@@ -2,24 +2,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Door : MonoBehaviour
+using Mirror;
+
+public class Door : NetworkBehaviour
 {
     [SerializeField, Range(0f, 15f)] private float smooth;
+    [SerializeField, Range(0f, 15f)] private float distance;
     [SerializeField] private bool autoClose;
 
     private Transform player;
-    private Transform ghost;
     private float targetYRotation;
     private Vector3 defaultRotation;
     private float timer = 0f;
-    private bool isOpen;
+
+    [SyncVar] private bool isOpen;
 
     public bool open { get { return isOpen; } }
-    void Start()
+
+    void Awake()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-        ghost = GameObject.FindGameObjectWithTag("Anomaly").transform;
+        player = GameObject.Find("LocalGamePlayer").transform;
         defaultRotation = transform.eulerAngles;
+        targetYRotation = 0.0f;
+    }
+
+    private void OnMouseOver()
+    {
+        if (Input.GetKeyDown(KeyCode.E) && Vector3.Distance(player.position, transform.position) < distance)
+        {
+            ToggleDoor(player.position);
+        }
     }
 
     void Update()
@@ -28,17 +40,13 @@ public class Door : MonoBehaviour
 
         timer -= Time.deltaTime;
 
-        if (Vector3.Distance(transform.position, ghost.transform.position) <= 1.5f)
-        {
-            Debug.Log("");
-            Open(ghost.position);
-        }
         if (timer <= 0f && isOpen && autoClose)
         {
             ToggleDoor(player.position);
         }
     }
 
+    [Command(requiresAuthority = false)]
     public void ToggleDoor(Vector3 pos)
     {
         isOpen = !isOpen;
@@ -55,6 +63,7 @@ public class Door : MonoBehaviour
         }
     }
 
+    [ServerCallback]
     public void Open(Vector3 pos)
     {
         if (!isOpen)
@@ -62,6 +71,8 @@ public class Door : MonoBehaviour
             ToggleDoor(pos);
         }
     }
+
+    [ServerCallback]
     public void Close(Vector3 pos)
     {
         if (isOpen)
@@ -70,6 +81,7 @@ public class Door : MonoBehaviour
         }
     }
 
+    [Command]
     public void Interact()
     {
         ToggleDoor(player.position);

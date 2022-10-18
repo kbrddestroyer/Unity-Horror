@@ -5,7 +5,9 @@ using UnityEngine;
 using UnityEngine.Windows.Speech;
 using System.Linq;
 
-public abstract class Anomaly : MonoBehaviour
+using Mirror;
+
+public abstract class Anomaly : NetworkBehaviour
 {
     [SerializeField, Range(0f, 100f)] private float distanceTreshold;
     [SerializeField, Range(0f, 1f)] protected float attackThreshold;
@@ -36,6 +38,7 @@ public abstract class Anomaly : MonoBehaviour
 
     public bool isHunting { get { return hunting; } }
 
+    [ServerCallback]
     protected void CheckPlayer(GameObject player)
     {
         if (Vector3.Distance(transform.position, player.transform.position) < distanceTreshold)
@@ -58,6 +61,13 @@ public abstract class Anomaly : MonoBehaviour
         }
     }
 
+    [Command(requiresAuthority = false)]
+    private void CmdStartCheckingPlayers()
+    {
+        StartCoroutine(CheckPlayers());
+    }
+
+    [ServerCallback]
     protected IEnumerator CheckPlayers()
     {
         while (true)
@@ -105,6 +115,11 @@ public abstract class Anomaly : MonoBehaviour
         can_perform_event = false;
         yield return new WaitForSeconds(eventCooldown);
         can_perform_event = true;
+    }
+
+    [ClientRpc] public void CmdStartHunt()
+    {
+        StartCoroutine(hunt());
     }
 
     public IEnumerator hunt()
@@ -176,7 +191,7 @@ public abstract class Anomaly : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         spawnPoint = transform;
         players = GameObject.FindGameObjectsWithTag("Player");
@@ -184,7 +199,7 @@ public abstract class Anomaly : MonoBehaviour
         spawnPoint = rooms[Random.Range(0, rooms.Length)].transform;
         transform.position = spawnPoint.position;
         transform.rotation = spawnPoint.rotation;
-        StartCoroutine(CheckPlayers());
+        CmdStartCheckingPlayers();
 
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
 
@@ -194,14 +209,13 @@ public abstract class Anomaly : MonoBehaviour
         });
         keywords.Add("fuck you leatherman", () =>
         {
-            StartCoroutine(hunt());
+            CmdStartHunt();
         });
         keywordRecognizer = new KeywordRecognizer(keywords.Keys.ToArray());
         keywordRecognizer.OnPhraseRecognized += KeywordRecognizer_OnPhraseRecognized;
         keywordRecognizer.Start();
 
         animator = GetComponentInChildren<Animator>();
-        Debug.Log(animator);
     }
 
     public abstract void ghostevent();

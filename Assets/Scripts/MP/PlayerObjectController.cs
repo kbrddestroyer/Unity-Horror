@@ -26,6 +26,12 @@ public class PlayerObjectController : NetworkBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
+    private void OnDestroy()
+    {
+        Cursor.lockState = CursorLockMode.None;                               // Lock cursor
+        Cursor.visible = true;
+    }
+
     public void CanStartGame(string sceneName)
     {
         if (hasAuthority)
