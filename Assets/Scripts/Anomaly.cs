@@ -9,19 +9,33 @@ using Mirror;
 
 public abstract class Anomaly : NetworkBehaviour
 {
-    [SerializeField, Range(0f, 100f)] private float distanceTreshold;
-    [SerializeField, Range(0f, 1f)] protected float attackThreshold;
-    [SerializeField, Range(0f, 1f)] protected float eventThreshold;
-    [SerializeField, Range(0f, 2f)] protected float huntKillDistance;
-    [SerializeField, Range(0, 100)] protected int huntDuration;
-    [SerializeField, Range(0, 100)] protected int huntCooldown;
-    [SerializeField, Range(0, 100)] protected int eventCooldown;
-    [SerializeField, Range(0, 100)] protected int checkThreshold;
-    [SerializeField] protected SkinnedMeshRenderer meshRenderer;
+    /*
+     *      Anomaly <- NetworkBehaviour
+     *      Defines ghost hunting behaviour, events logics, signs, voice recognition etc.
+     *      Base class of every ghost behaviour script (Must be at least)
+     *      
+     *      Status: IN ACTIVE DEVELOPMENT
+     *      
+     *      TODO LIST:
+     *      - Review hunting behaviour
+     *      - Review NavMesh communication (checks required)
+     *      - Mass testing required (NetworkBehaviour)
+     *      - Add signs list and sign logics
+    */
+    [SerializeField, Range(0f, 100f)] private float distanceTreshold;   // Distance, where ghost triggers mind-decrement
 
-    [SerializeField] protected bool disappears;
-    [SerializeField] protected GameObject[] players;
-    [SerializeField] protected GameObject[] rooms;
+    [SerializeField, Range(0f, 1f)] protected float attackThreshold;    // 
+    [SerializeField, Range(0f, 1f)] protected float eventThreshold;     // 
+    [SerializeField, Range(0f, 2f)] protected float huntKillDistance;   // Distacne
+    [SerializeField, Range(0, 100)] protected int huntDuration;         // 
+    [SerializeField, Range(0, 100)] protected int huntCooldown;         // 
+    [SerializeField, Range(0, 100)] protected int eventCooldown;        // 
+    [SerializeField, Range(0, 100)] protected int checkThreshold;       // 
+    [SerializeField] protected SkinnedMeshRenderer meshRenderer;        // 
+
+    [SerializeField] protected bool disappears;                         // 
+    [SerializeField] protected GameObject[] players;                    // 
+    [SerializeField] protected GameObject[] rooms;                      // 
 
     protected bool hunting = false;
     protected bool inEvent = false;
@@ -39,30 +53,34 @@ public abstract class Anomaly : NetworkBehaviour
     public bool isHunting { get { return hunting; } }
 
     [ServerCallback]
-    protected void CheckPlayer(GameObject player)
+    protected void CheckPlayer(GameObject player)   // If player is in ghost influence - lower mind level
     {
         if (Vector3.Distance(transform.position, player.transform.position) < distanceTreshold)
         {
             Player player_ = player.GetComponent<Player>();
             player_.mind -= Random.Range(0.01f, 0.05f);
-            if (player_.mind < 0) player_.mind = 0;
+            if (player_.mind < 0) player_.mind = 0;         // IDK if this nessesary [!]
         }
     }
 
     protected void UpdatePlayersList()
     {
         players = GameObject.FindGameObjectsWithTag("Player");
+
         for (int i = 0; i < players.Length; i++)
         {
             if (!players[i].GetComponent<Player>().alive)
+            {
+                // If player dead - remove it from active players container
                 for (int j = i; j < players.Length - 1; j++)
-                    players[i] = players[i + 1];
-            System.Array.Resize(ref players, players.Length - 1);
+                    players[i] = players[i + 1];                        // Move on one element
+                System.Array.Resize(ref players, players.Length - 1);   // Resize the resulting array
+            }
         }
     }
 
     [Command(requiresAuthority = false)]
-    private void CmdStartCheckingPlayers()
+    private void CmdStartCheckingPlayers()  // Commands executed on server by client request 
     {
         StartCoroutine(CheckPlayers());
     }
@@ -79,11 +97,20 @@ public abstract class Anomaly : NetworkBehaviour
                 average_mind += players[i].GetComponent<Player>().mind;
             }
             average_mind /= players.Length;
-            Debug.Log("Average Status: " + average_mind * 100 + "%");
+            
+            /*
+             *  "DICE" event pattern
+             *  Program "Rolls the dice" and decides to run / not run the hunt / event
+             *  
+             *  UPD. Random.Range works on [a, b); (So Random.Range(1, 3) generates 1 and 2)
+             *  
+             *  Current settings: [1, 2) with 50% chance of performing event or hunt
+            */
+
             if (average_mind < attackThreshold && !hunting && can_hunt)
             {
                 int dice = Random.Range(1, 3);
-                if (dice == 2) StartCoroutine(hunt());
+                if (dice == 2) CmdStartHunt();
             }
             if (average_mind < eventThreshold && !inEvent && can_perform_event)
             {
@@ -96,6 +123,8 @@ public abstract class Anomaly : NetworkBehaviour
 
     protected IEnumerator HuntThreshold()
     {
+        // This event performs after hunt() coroutine starts. This one determines how long hunting will last
+
         hunting = true;
         yield return new WaitForSeconds(huntDuration);
         StartCoroutine(HuntCooldown());
@@ -105,6 +134,8 @@ public abstract class Anomaly : NetworkBehaviour
 
     protected IEnumerator HuntCooldown()
     {
+        // This event calls after hunt() coroutine stops. This one determines, when new hunt can be performed again.
+        
         can_hunt = false;
         yield return new WaitForSeconds(huntCooldown);
         can_hunt = true;
@@ -112,6 +143,8 @@ public abstract class Anomaly : NetworkBehaviour
 
     protected IEnumerator EventCooldown()
     {
+        // This event calls after ghostevent() stops. This one determines when new ghostevent can be performed again.
+
         can_perform_event = false;
         yield return new WaitForSeconds(eventCooldown);
         can_perform_event = true;
@@ -119,28 +152,37 @@ public abstract class Anomaly : NetworkBehaviour
 
     [ClientRpc] public void CmdStartHunt()
     {
+        // ClientRpc code executes on every client after server request
+
         StartCoroutine(hunt());
     }
 
     public IEnumerator hunt()
     {
-        StartCoroutine(HuntThreshold());
-        Debug.Log("Hunt!");
-        hunting = true;
+        StartCoroutine(HuntThreshold());        // Starts parallel hunt controller. It will stop this coroutine when needed
+        hunting = true;                         
         can_perform_event = false;
-        //GetComponent<MeshRenderer>().enabled = true;
         meshRenderer.enabled = true;
+
         while (hunting)
         {
-            bool found = false;
-            Transform closest = transform;
-            foreach (GameObject player in players)
+            /*
+             *  SECTION 1: FINDING SUITABLE PLAYER
+             *  
+             *  Uses raycasting to EVERY alive player on map. If player is visible and in distance of vision - starts chasing.
+            */
+            bool found = false;                         // Find anyone?
+            Transform closest = transform;              // Closest player
+
+            foreach (GameObject player in players)      // Players array is being updated in CheckPlayers()
             {
                 Ray ray = new Ray(transform.position, (player.transform.position - transform.position).normalized);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit))
                 {
-                    if (hit.transform.gameObject.tag == "Player" && ((found && Vector3.Distance(transform.position, closest.position) > Vector3.Distance(player.transform.position, transform.position)) || !found))
+                    if (hit.transform.gameObject.tag == "Player" 
+                        && ((found && Vector3.Distance(transform.position, closest.position) > Vector3.Distance(player.transform.position, transform.position)) 
+                        || !found))
                     {
                         closest = player.transform;
                         found = true;
@@ -148,36 +190,46 @@ public abstract class Anomaly : NetworkBehaviour
                     }
                 }
             }
+
+            /*
+             *  SECTION 2: CHASE OR WANDER
+            */
+
             if (found)
             {
                 if (Vector3.Distance(closest.position, transform.position) < huntKillDistance)
                 {
-                    closest.gameObject.GetComponent<Player>().Die();
-                    UpdatePlayersList();
-                    if (players.Length == 0) Debug.Log("Game Over");
-                    hunting = false;
+                    //-----------------------------------------------//
+                    //                      KILL                     //
+                    //-----------------------------------------------//
+
+                    closest.gameObject.GetComponent<Player>().Die();        // see Player.cs::Die();
+                    UpdatePlayersList();                                    // Remove dead body from players list
+                    if (players.Length == 0) Debug.Log("Game Over");        // TODO: Switch to lobby correctly
+                    hunting = false;                                        // if had kill - stop hunting
                     break;
                 }
-                if (!agent.SetDestination(closest.position)) found = false;
+                if (!agent.SetDestination(closest.position)) found = false; // If failed to fetch availibale path on NavMesh
             }
             else
             {
                 if (!agent.hasPath)
                 {
                     int id = Random.Range(0, rooms.Length);
-                    Debug.Log(id);
-                    agent.SetDestination(rooms[id].transform.position);
+
+                    agent.SetDestination(rooms[id].transform.position);     // Wander to random room
                 }
             }
-            animator.SetFloat("speed", agent.speed);
+            animator.SetFloat("speed", agent.speed);                        // Animated as player btw.
             yield return new WaitForEndOfFrame();
         }
-        Debug.Log("It's over");
-        //GetComponent<MeshRenderer>().enabled = false;
+        
+        // END HUNT ->
+
         meshRenderer.enabled = false;
         transform.position = spawnPoint.position;
         transform.rotation = spawnPoint.rotation;
-        Debug.Log(spawnPoint);
+
         agent.SetDestination(spawnPoint.position);
         yield return null;
     }

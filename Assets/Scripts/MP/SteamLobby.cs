@@ -9,37 +9,51 @@ using Steamworks;
 
 public class SteamLobby : MonoBehaviour
 {
-    public static SteamLobby instance;
+    /*
+     *      SteamLobby <- MonoBehaviour
+     *      SteamLobby class is used for UI controlling, SteamworksAPI Callback controlling, etc.
+    */
 
-    protected Callback<LobbyCreated_t> LobbyCreated;
-    protected Callback<GameLobbyJoinRequested_t> JoinRequest;
-    protected Callback<LobbyEnter_t> LobbyEnter;
+    //*******************************************************************************************//
 
-    public ulong CurrentLobbyID;
-    private const string HostAddressKey = "HostAddress";
-    private CustomNetworkManager manager;
+    public static   SteamLobby  instance;
+    public          ulong       CurrentLobbyID;
+
+    protected Callback<LobbyCreated_t>            LobbyCreated;
+    protected Callback<GameLobbyJoinRequested_t>  JoinRequest;
+    protected Callback<LobbyEnter_t>              LobbyEnter;
+    
+    private const string                          HostAddressKey = "HostAddress";
+    private CustomNetworkManager                  manager;
+
+    //*******************************************************************************************//
 
     private void Start()
     {
         if (!instance)
-            instance = this;
+            instance = this; // Pointer to current class
 
-        manager = GetComponent<CustomNetworkManager>();
+        manager = GetComponent<CustomNetworkManager>();                 
 
         try
         {
             InteropHelp.TestIfAvailableClient();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             if (!SteamAPI.Init())
             {
+                /*
+                 *          If Steamworks failed to fetch API handler and SteamAPI library failed either
+                 *          exit init process.
+                */
                 return;
             }
         }
-        LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
-        JoinRequest = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);
-        LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
+
+        LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);             // OnLobbyCreated Event Callback
+        JoinRequest = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);     // OnJoinRequest Event Callback
+        LobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEntered);                 // OnLobbyEntered Event Callback
     }
 
     public void HostLobby()
@@ -48,11 +62,10 @@ public class SteamLobby : MonoBehaviour
         {
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, manager.maxConnections);
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            if (!File.Exists("crash_log.txt")) File.Create("crash_log.txt");
-
-            File.AppendAllText("crash_log.txt", DateTime.Now.ToString() + " : " + e.Message + '\n');
+            // If failed to fetch new lobby -> return
+            return;
         }
     }
 
@@ -60,7 +73,6 @@ public class SteamLobby : MonoBehaviour
     {
         if (callback.m_eResult != EResult.k_EResultOK) { return; }
 
-        Debug.Log("Lobby Created");
         manager.StartHost();
 
         SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), HostAddressKey, SteamUser.GetSteamID().ToString());

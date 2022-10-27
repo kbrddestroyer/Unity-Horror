@@ -33,7 +33,7 @@ public class Player : NetworkBehaviour
 
     [SyncVar(hook = nameof(ChangeLightState))] private bool light_state = false;
     [SyncVar] public float mind = 1.0f;                                         // Parameter for anomalies (heal point)
-    [SyncVar] private bool isPlaying = false;
+    [SyncVar] private bool isPlaying = false;                                   // Sound param: is playing footsteps (used only for network sync)
 
     [Command]
     private void CmdChangeLightState()
