@@ -5,7 +5,7 @@ using UnityEngine;
 public class UIButtonController : MonoBehaviour
 {
     /*
-     *       UIButtonController - class used for UI controling
+     *       UIButtonController - class used for UI controling :|
     */
     public void ExitGame()
     {

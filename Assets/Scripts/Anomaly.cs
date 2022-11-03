@@ -11,6 +11,7 @@ public abstract class Anomaly : NetworkBehaviour
 {
     /*
      *      Anomaly <- NetworkBehaviour
+     *      Anomaly -> GhostClasses
      *      Defines ghost hunting behaviour, events logics, signs, voice recognition etc.
      *      Base class of every ghost behaviour script (Must be at least)
      *      
@@ -22,15 +23,17 @@ public abstract class Anomaly : NetworkBehaviour
      *      - Mass testing required (NetworkBehaviour)
      *      - Add signs list and sign logics
     */
+
+    //---   Serializable Fields   ---//
     [SerializeField, Range(0f, 100f)] private float distanceTreshold;   // Distance, where ghost triggers mind-decrement
 
     [SerializeField, Range(0f, 1f)] protected float attackThreshold;    // 
     [SerializeField, Range(0f, 1f)] protected float eventThreshold;     // 
     [SerializeField, Range(0f, 2f)] protected float huntKillDistance;   // Distacne
-    [SerializeField, Range(0, 100)] protected int huntDuration;         // 
-    [SerializeField, Range(0, 100)] protected int huntCooldown;         // 
-    [SerializeField, Range(0, 100)] protected int eventCooldown;        // 
-    [SerializeField, Range(0, 100)] protected int checkThreshold;       // 
+    [SerializeField, Range(0, 100)] protected int   huntDuration;       // 
+    [SerializeField, Range(0, 100)] protected int   huntCooldown;       // 
+    [SerializeField, Range(0, 100)] protected int   eventCooldown;      // 
+    [SerializeField, Range(0, 100)] protected int   checkThreshold;     // 
     [SerializeField] protected SkinnedMeshRenderer meshRenderer;        // 
 
     [SerializeField] protected bool disappears;                         // 
@@ -49,6 +52,11 @@ public abstract class Anomaly : NetworkBehaviour
     private KeywordRecognizer keywordRecognizer;
     private Dictionary<string, System.Action> keywords = new Dictionary<string, System.Action>();
     private Animator animator;
+
+    [SerializeField] public bool isPerformingRadio;
+    [SerializeField] public bool isPerformingEMP;
+    [SerializeField] public bool isPerformingNotes;
+    [SerializeField] public bool isPerformingFlashlight;
 
     public bool isHunting { get { return hunting; } }
 

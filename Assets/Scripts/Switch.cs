@@ -2,12 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Switch : MonoBehaviour
+using Mirror;
+
+public class Switch : NetworkBehaviour
 {
     [SerializeField] private Light controllerLight;
-    
+    [SyncVar(hook = nameof(ChangeLightState))] private bool lightState;
+
+    public void ChangeLightState(bool old_, bool new_)
+    {
+        lightState = new_;
+    }
+
+    [Command]
+    public void CmdChangeLightState()
+    {
+        ChangeLightState(lightState, !lightState);
+    }
+
     public void switch_light()
     {
-        controllerLight.enabled = !controllerLight.enabled;
+        CmdChangeLightState();
+    }
+
+    private void Update()
+    {
+        if (controllerLight.enabled != lightState) controllerLight.enabled = lightState;
     }
 }

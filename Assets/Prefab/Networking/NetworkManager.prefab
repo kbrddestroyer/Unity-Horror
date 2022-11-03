@@ -63,6 +63,7 @@ MonoBehaviour:
   spawnPrefabs:
   - {fileID: 2246462475299060806, guid: bb1d35d74972e0d45a25a6852cfa240e, type: 3}
   playerObjectController: {fileID: 6550627613061766665, guid: bb1d35d74972e0d45a25a6852cfa240e, type: 3}
+  lobbySceneName: Lobby
 --- !u!114 &4991089026956304800
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class FlashlightLag : MonoBehaviour
 {
+    /*
+     *          WARNING: NEEDS TESTING!!!
+     */
     [SerializeField] private new Light light;
 
     private int intensity;

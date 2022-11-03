@@ -81,7 +81,6 @@ public class SteamLobby : MonoBehaviour
 
     private void OnJoinRequest(GameLobbyJoinRequested_t callback)
     {
-        Debug.Log("Join Requested");
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
 

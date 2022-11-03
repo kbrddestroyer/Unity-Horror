@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
 using Mirror;
 
 public class Player : NetworkBehaviour
@@ -147,6 +149,7 @@ public class Player : NetworkBehaviour
             if (Input.GetKeyDown(KeyCode.LeftControl))
             {
                 crouching = !crouching;
+                animator.SetBool("crouch", crouching);
             }
 
             transform.Translate(new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")) * ((running) ? run_speed : speed) * Time.deltaTime);

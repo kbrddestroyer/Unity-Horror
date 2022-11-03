@@ -9,6 +9,7 @@ public class InventorySystem : NetworkBehaviour
     //---------------------------------------------------------------------------------//
     //                                  Editor Settings                                //
     //---------------------------------------------------------------------------------//
+
     [Header("Pickup Settings")]
     [SerializeField]                    private Transform   rootpoint;      // Root point for InteractableIten (Holding spot)
     [SerializeField]                    private Transform   rootpoint_global;      // Root point for InteractableIten (Holding spot)

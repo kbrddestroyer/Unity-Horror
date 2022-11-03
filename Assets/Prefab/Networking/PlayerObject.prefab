@@ -568,7 +568,6 @@ GameObject:
   - component: {fileID: 3963651278593553174}
   - component: {fileID: 4314642052579363842}
   - component: {fileID: 7286044669867607687}
-  - component: {fileID: 821463663518967854}
   - component: {fileID: 4562687245545921737}
   - component: {fileID: 5817204111156247043}
   - component: {fileID: 6187674395361079491}
@@ -661,8 +660,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  msens: 1.54
-  speed: 2
   enableOnSceneStart:
   - {fileID: 3079910118007385682}
   - {fileID: 5998012143442728374}
@@ -983,44 +980,6 @@ MonoBehaviour:
   syncAngularVelocity: 1
   clearAngularVelocity: 0
   angularVelocitySensitivity: 0.1
---- !u!114 &821463663518967854
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2246462475299060806}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 734b48bea0b204338958ee3d885e11f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  clientAuthority: 1
-  sendRate: 30
-  bufferTimeMultiplier: 2
-  bufferSizeLimit: 64
-  catchupNegativeThreshold: -1
-  catchupPositiveThreshold: 1
-  catchupSpeed: 0.009999999776482582
-  slowdownSpeed: 0.009999999776482582
-  driftEmaDuration: 1
-  dynamicAdjustment: 1
-  dynamicAdjustmentTolerance: 1
-  deliveryTimeEmaDuration: 2
-  onlySyncOnChange: 1
-  bufferResetMultiplier: 5
-  positionSensitivity: 0.01
-  rotationSensitivity: 0.01
-  scaleSensitivity: 0.01
-  syncPosition: 1
-  syncRotation: 1
-  syncScale: 0
-  showGizmos: 0
-  showOverlay: 0
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
-  target: {fileID: 0}
 --- !u!114 &4562687245545921737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1585,7 +1544,7 @@ Transform:
   - {fileID: 2601668503979135}
   - {fileID: 5939371173969691023}
   m_Father: {fileID: 4971857647355499587}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4101593970384691161
 GameObject:
@@ -1873,7 +1832,7 @@ Transform:
   - {fileID: 5125983709468764089}
   - {fileID: 5125983708464413901}
   m_Father: {fileID: 4971857647355499587}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5125983708310725532
 MonoBehaviour:
@@ -2415,8 +2374,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6547775678656557014}
-  - {fileID: 5125983708310725533}
   - {fileID: 5250825460206293850}
+  - {fileID: 5125983708310725533}
   m_Father: {fileID: 949573541315908412}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2607,7 +2566,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 60
   orthographic: 0

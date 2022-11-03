@@ -7,29 +7,30 @@ using Steamworks;
 
 public class PlayerObjectController : NetworkBehaviour
 {
-    [SyncVar] public int ConnectionID;
-    [SyncVar] public int PlayerIDNumber;
-    [SyncVar] public ulong PlayerSteamID;
-    [SyncVar(hook = nameof(PlayerNameUpdate))] public string PlayerName;
-    [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool Ready;
+    [SyncVar] public int ConnectionID;                                      // Identifier of current Mirror connection
+    [SyncVar] public int PlayerIDNumber;                                    // Player number. Specifies unique ID
+    [SyncVar] public ulong PlayerSteamID;                                   // Steam account ID. Uses in SteamAPI functions
+    [SyncVar(hook = nameof(PlayerNameUpdate))] public string PlayerName;    // Nickname
+    [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool Ready;          // State
 
-    private CustomNetworkManager manager;
+    private CustomNetworkManager manager;                                   // Connection, Status, Connection Data etc.                                  
     public CustomNetworkManager Manager {
+        // public get modifier for manager
         get {
             if (manager) return manager;
-            return manager = CustomNetworkManager.singleton as CustomNetworkManager;
+            return manager = CustomNetworkManager.singleton as CustomNetworkManager;    // singleton - the only unique NetworkManager
         }
     }
 
     private void Start()
     {
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(this.gameObject);                                   // PlayerObjectController must be saved to be used outside of the lobby 
     }
 
     private void OnDestroy()
     {
         Cursor.lockState = CursorLockMode.None;                               // Lock cursor
-        Cursor.visible = true;
+        Cursor.visible = true;                                                // Disable cursor
     }
 
     public void CanStartGame(string sceneName)
@@ -46,22 +47,26 @@ public class PlayerObjectController : NetworkBehaviour
     public override void OnStartAuthority()
     {
         CmdSetPlayerName(SteamFriends.GetPersonaName().ToString());
-        gameObject.name = "LocalGamePlayer";
+        gameObject.name = "LocalGamePlayer";                            // TODO: Replace Hardcode [!]
         LobbyController.instance.FindLocalPlayer();
         LobbyController.instance.UpdateLobbyName();
     }
 
     public override void OnStartClient()
     {
-        Manager.players.Add(this);
-        LobbyController.instance.UpdateLobbyName();
-        LobbyController.instance.UpdateLobbyPlayers();
+        /*
+         *      If connected successfully:
+         */
+        Manager.players.Add(this);                      // Add current player to the manager list
+        LobbyController.instance.UpdateLobbyName();     // Update current player nickname
+        LobbyController.instance.UpdateLobbyPlayers();  // Fetch all players from server
     }
 
     public override void OnStopClient()
     {
-        Manager.players.Remove(this);
-        LobbyController.instance.UpdateLobbyPlayers();
+        // DISCONNECT:
+        Manager.players.Remove(this);                       // Remove current player from connection list
+        LobbyController.instance.UpdateLobbyPlayers();      // Update all players on server
     }
     
     [Command] private void CmdSetPlayerName(string Name)
@@ -81,7 +86,7 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    private void PlayerReadyUpdate(bool old_, bool new_)
+    private void PlayerReadyUpdate(bool old_, bool new_)    // Hook
     {
         if (isServer)
         {
@@ -93,12 +98,12 @@ public class PlayerObjectController : NetworkBehaviour
         }
     }
 
-    [Command] private void CmdSetPlayerReady()
+    [Command] private void CmdSetPlayerReady()  // Exec. on server
     {
         this.PlayerReadyUpdate(this.Ready, !this.Ready);
     }
 
-    public void ToggleReady()
+    public void ToggleReady()       // Used in UI calls
     {
         if (hasAuthority)
         {

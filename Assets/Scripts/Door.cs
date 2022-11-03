@@ -6,6 +6,10 @@ using Mirror;
 
 public class Door : NetworkBehaviour
 {
+    /*
+     *      Door logic (I'll comment it later)
+     */
+
     [SerializeField, Range(0f, 15f)] private float smooth;
     [SerializeField, Range(0f, 15f)] private float distance;
     [SerializeField] private bool autoClose;

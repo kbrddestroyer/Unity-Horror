@@ -7,11 +7,16 @@ using Mirror;
 
 public class PlayerMovementController : NetworkBehaviour
 {
-    [SerializeField, Range(0f, 10f)] private float msens;              // Mouse sens
-    [SerializeField, Range(0f, 10f)] private float speed;
+    /*
+     *          --- WARNING: SCRIPT OUT OF DATE ---
+     *          USING PLAYER.CS INSTEAD OF THIS ONE
+     * 
+     * TODO: MOVE EVERYTHING TO PLAYER.CS [!]
+    */
+
     [SerializeField] private Behaviour[] enableOnSceneStart;
     public GameObject playerObject;
-    public Camera camera;
+    public new Camera camera;
     
     private Vector3 rotation;
 
@@ -26,7 +31,7 @@ public class PlayerMovementController : NetworkBehaviour
     {
         if (hasAuthority)
         {
-            if (Input.GetKeyDown(KeyCode.F1))
+            if (Input.GetKeyDown(KeyCode.F1))               // WARNING! DELETE THIS ON RELEASE!!! THIS IS DEBUG TOOL
             {
                 transform.position = new Vector3(0, 2, 0);
             }
@@ -37,7 +42,7 @@ public class PlayerMovementController : NetworkBehaviour
     {
         yield return new WaitForSeconds(0.1f);
 
-        GameObject[] SpawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
+        GameObject[] SpawnPoints = GameObject.FindGameObjectsWithTag("Respawn"); // [!] HARDCODE
 
         this.transform.position = SpawnPoints[Random.Range(0, SpawnPoints.Length)].transform.position;
         this.transform.rotation = SpawnPoints[Random.Range(0, SpawnPoints.Length)].transform.rotation;
@@ -47,7 +52,7 @@ public class PlayerMovementController : NetworkBehaviour
 
     private void OnSceneChanged(Scene current, Scene next)
     {
-        if (next.name == "Lobby") return;
+        if (next.name == "Lobby") return;                                       // [!] HARDCODE
         if (playerObject.activeSelf == false)
         {
             this.playerObject.SetActive(true);
@@ -61,7 +66,7 @@ public class PlayerMovementController : NetworkBehaviour
             }
             else
             {
-                playerObject.transform.Find("Ch32").gameObject.layer = 0;
+                playerObject.transform.Find("Ch32").gameObject.layer = 0;        // [!] HARDCODE
             }
         }
     }

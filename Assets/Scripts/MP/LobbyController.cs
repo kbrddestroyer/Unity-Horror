@@ -10,28 +10,35 @@ using System.Linq;
 
 public class LobbyController : MonoBehaviour
 {
-    public static LobbyController instance;
-    public Text lobbyNameText;
+    /*
+     *  LobbyController <- MonoBehaviout
+     *  
+     *  Just sort of UI manager. Puts/Removes prefabs on/from list on Canvas when player connects/disconnects
+    */
 
-    public GameObject PlayerListViewContent;
-    public GameObject PlayerListItemPrefab;
-    public GameObject LocalPlayerObject;
+    public static LobbyController instance;                                     // This object
+    public Text lobbyNameText;                                                  // LobbyName is fetched from SteamAPI (Setup in SteamLobby.cs)
 
-    public ulong CurrentLobbyID;
-    public bool PlayerItemCreated = false;
+    public GameObject PlayerListViewContent;                                    // Content of ScrollView
+    public GameObject PlayerListItemPrefab;                                     // Element of UI
+    public GameObject LocalPlayerObject;                                        // Current player
 
-    private List<PlayerListItem> playerListItems = new List<PlayerListItem>();
+    public ulong CurrentLobbyID;                                                // Unique identifier
+    public bool PlayerItemCreated = false;                                      // ????
 
-    public PlayerObjectController localPlayerController;
+    private List<PlayerListItem> playerListItems = new List<PlayerListItem>();  // List of all connected players
 
-    public Button StartGameBtn;
-    public Text ReadyButtonText;
+    public PlayerObjectController localPlayerController;                        // Current player <- PlayerObjectController
 
-    private CustomNetworkManager manager;
+    public Button StartGameBtn;                                                 // Button will be toggled on when everyone is ready
+    public Text ReadyButtonText;                                                // Ready/Not ready (will be toggled as well depending on player status)
+
+    private CustomNetworkManager manager;                                       // NetworkManager
     public CustomNetworkManager Manager
     {
         get
         {
+            // public GET modifier
             if (manager) return manager;
             return manager = CustomNetworkManager.singleton as CustomNetworkManager;
         }
@@ -42,12 +49,12 @@ public class LobbyController : MonoBehaviour
         if (!instance) instance = this;
     }
 
-    public void ReadyPlayer()
+    public void ReadyPlayer()   // used in UI
     {
         localPlayerController.ToggleReady();
     }
 
-    public void UpdateBtn()
+    public void UpdateBtn()     // used in UI
     {
         if (localPlayerController.Ready)
         {

@@ -25,14 +25,15 @@ public class CustomNetworkManager : NetworkManager
     */
 
     [SerializeField] private PlayerObjectController playerObjectController;                     // Prefab for PlayerObjectController, used to create new player
+    [SerializeField] private string lobbySceneName;
     public List<PlayerObjectController> players { get; } = new List<PlayerObjectController>();  // List, containing all players in lobby/game scene
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
-    {
+    {   
         /*
-         *  [TODO] Replace hardcoded IF statement with something more suitable
-        */
-        if (SceneManager.GetActiveScene().name == "Lobby")
+         *  Run this code only if in lobby
+         */
+        if (SceneManager.GetActiveScene().name == lobbySceneName)
         {
             // Creates new entity in list if player has connected to lobby
             PlayerObjectController current_player = Instantiate(playerObjectController);
