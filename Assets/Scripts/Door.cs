@@ -16,7 +16,7 @@ public class Door : NetworkBehaviour
 
     private AudioSource audioSource;
 
-    private Transform player;
+    [SerializeField] private Transform player;
     private float targetYRotation;
     private Vector3 defaultRotation;
     private float timer = 0f;
@@ -41,8 +41,9 @@ public class Door : NetworkBehaviour
 
     private void OnMouseOver()
     {
-        if (Input.GetKeyDown(KeyCode.E) && Vector3.Distance(player.position, transform.position) < distance)
+        if (Input.GetKeyDown(KeyCode.E) && Vector3.Distance(player.position, transform.position) <= distance)
         {
+            Debug.Log("Opening!");            
             ToggleDoor(player.position);
         }
     }
