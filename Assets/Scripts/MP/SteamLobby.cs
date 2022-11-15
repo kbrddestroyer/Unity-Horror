@@ -51,6 +51,7 @@ public class SteamLobby : MonoBehaviour
                  *          If Steamworks failed to fetch API handler and SteamAPI library failed either
                  *          exit init process.
                 */
+                
                 return;
             }
         }

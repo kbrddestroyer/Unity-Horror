@@ -51,10 +51,13 @@ public class Player : NetworkBehaviour
     [ClientRpc]
     public void Die()
     {
-        Instantiate(ragdoll, transform).transform.parent = null;
-        mesh.enabled = false;
-        mainCamera.transform.Find("PostProcess").GetComponent<Collider>().enabled = true;
-        alive = false;
+        if (alive)
+        {
+            Instantiate(ragdoll, transform).transform.parent = null;
+            mesh.enabled = false;
+            mainCamera.transform.Find("PostProcess").GetComponent<Collider>().enabled = true;
+            alive = false;
+        }
     }
 
     private void OnCollisionEnter(Collision collision)

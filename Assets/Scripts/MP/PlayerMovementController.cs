@@ -40,19 +40,27 @@ public class PlayerMovementController : NetworkBehaviour
 
     private IEnumerator updateSpawn()
     {
-        yield return new WaitForSeconds(0.1f);
+        while (hasAuthority && NetworkClient.isLoadingScene) yield return new WaitForEndOfFrame();
+        if (hasAuthority)
+        {
+            GameObject[] SpawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
 
-        GameObject[] SpawnPoints = GameObject.FindGameObjectsWithTag("Respawn"); // [!] HARDCODE
+            int id = Random.Range(0, SpawnPoints.Length);
 
-        this.transform.position = SpawnPoints[Random.Range(0, SpawnPoints.Length)].transform.position;
-        this.transform.rotation = SpawnPoints[Random.Range(0, SpawnPoints.Length)].transform.rotation;
+            this.transform.position = SpawnPoints[id].transform.position;
+            this.transform.rotation = SpawnPoints[id].transform.rotation;
 
-        this.playerObject.SetActive(true);
+            this.playerObject.SetActive(true);
+        }
     }
 
     private void OnSceneChanged(Scene current, Scene next)
     {
-        if (next.name == "Lobby") return;                                       // [!] HARDCODE
+        if (next.name == "Lobby")                                      // [!] HARDCODE
+        {
+
+            return;
+        }
         if (playerObject.activeSelf == false)
         {
             this.playerObject.SetActive(true);

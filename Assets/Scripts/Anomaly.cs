@@ -37,7 +37,7 @@ public abstract class Anomaly : NetworkBehaviour
     [SerializeField] protected SkinnedMeshRenderer meshRenderer;        // 
 
     [SerializeField] protected bool disappears;                         // 
-    [SerializeField] protected GameObject[] players;                    // 
+    [SerializeField] protected List<GameObject> players;                    // 
     [SerializeField] protected GameObject[] rooms;                      // 
 
     protected bool hunting = false;
@@ -71,18 +71,15 @@ public abstract class Anomaly : NetworkBehaviour
         }
     }
 
+    [ServerCallback]
     protected void UpdatePlayersList()
     {
-        players = GameObject.FindGameObjectsWithTag("Player");
-
-        for (int i = 0; i < players.Length; i++)
+        players = new List<GameObject>(GameObject.FindGameObjectsWithTag("Player"));
+        for (int i = 0; i < players.Count; i++)
         {
             if (!players[i].GetComponent<Player>().alive)
             {
-                // If player dead - remove it from active players container
-                for (int j = i; j < players.Length - 1; j++)
-                    players[i] = players[i + 1];                        // Move on one element
-                System.Array.Resize(ref players, players.Length - 1);   // Resize the resulting array
+                players.Remove(players[i]);
             }
         }
     }
@@ -99,12 +96,12 @@ public abstract class Anomaly : NetworkBehaviour
         while (true)
         {
             average_mind = 0.0f;
-            for (int i = 0; i < players.Length; i++)
+            for (int i = 0; i < players.Count; i++)
             {
                 CheckPlayer(players[i]);
                 average_mind += players[i].GetComponent<Player>().mind;
             }
-            average_mind /= players.Length;
+            average_mind /= players.Count;
             
             /*
              *  "DICE" event pattern
@@ -158,19 +155,27 @@ public abstract class Anomaly : NetworkBehaviour
         can_perform_event = true;
     }
 
-    [ClientRpc] public void CmdStartHunt()
+    [ServerCallback] public void CmdStartHunt()
     {
         // ClientRpc code executes on every client after server request
 
         StartCoroutine(hunt());
     }
 
+    [ClientRpc]
+    private void ToggleRenderer(bool enabled)
+    {
+        meshRenderer.enabled = enabled;
+    }
+
+    [ServerCallback]
     public IEnumerator hunt()
     {
         StartCoroutine(HuntThreshold());        // Starts parallel hunt controller. It will stop this coroutine when needed
+        UpdatePlayersList();
         hunting = true;                         
         can_perform_event = false;
-        meshRenderer.enabled = true;
+        ToggleRenderer(true);
 
         while (hunting)
         {
@@ -194,6 +199,7 @@ public abstract class Anomaly : NetworkBehaviour
                     {
                         closest = player.transform;
                         found = true;
+                        Debug.DrawLine(transform.position, closest.transform.position, Color.red, 10f, true);
                         break;
                     }
                 }
@@ -211,10 +217,10 @@ public abstract class Anomaly : NetworkBehaviour
                     //                      KILL                     //
                     //-----------------------------------------------//
 
-                    closest.gameObject.GetComponent<Player>().Die();        // see Player.cs::Die();
-                    UpdatePlayersList();                                    // Remove dead body from players list
-                    if (players.Length == 0) Debug.Log("Game Over");        // TODO: Switch to lobby correctly
-                    hunting = false;                                        // if had kill - stop hunting
+                    closest.gameObject.GetComponent<Player>().Die();       // see Player.cs::Die();
+                    players.Remove(closest.gameObject);                    // Remove dead body from players list
+                    if (players.Count == 0) Debug.Log("Game Over");        // TODO: Switch to lobby correctly
+                    hunting = false;                                       // if had kill - stop hunting
                     break;
                 }
                 if (!agent.SetDestination(closest.position)) found = false; // If failed to fetch availibale path on NavMesh
@@ -226,19 +232,21 @@ public abstract class Anomaly : NetworkBehaviour
                     int id = Random.Range(0, rooms.Length);
 
                     agent.SetDestination(rooms[id].transform.position);     // Wander to random room
+                    Debug.DrawLine(transform.position, rooms[id].transform.position, Color.red, 10f, false); ;
                 }
             }
             animator.SetFloat("speed", agent.speed);                        // Animated as player btw.
+            
             yield return new WaitForEndOfFrame();
         }
-        
+
         // END HUNT ->
 
-        meshRenderer.enabled = false;
+        ToggleRenderer(false);
         transform.position = spawnPoint.position;
         transform.rotation = spawnPoint.rotation;
-
-        agent.SetDestination(spawnPoint.position);
+        agent.ResetPath();
+        //agent.SetDestination(spawnPoint.position);
         yield return null;
     }
 
@@ -254,12 +262,13 @@ public abstract class Anomaly : NetworkBehaviour
     private void Awake()
     {
         spawnPoint = transform;
-        players = GameObject.FindGameObjectsWithTag("Player");
+        players = new List<GameObject>(GameObject.FindGameObjectsWithTag("Player"));
         rooms = GameObject.FindGameObjectsWithTag("GameController");
         spawnPoint = rooms[Random.Range(0, rooms.Length)].transform;
         transform.position = spawnPoint.position;
         transform.rotation = spawnPoint.rotation;
-        CmdStartCheckingPlayers();
+        if (NetworkClient.Ready())
+            CmdStartCheckingPlayers();
 
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
 

@@ -14,6 +14,8 @@ public class Door : NetworkBehaviour
     [SerializeField, Range(0f, 15f)] private float distance;
     [SerializeField] private bool autoClose;
 
+    private AudioSource audioSource;
+
     private Transform player;
     private float targetYRotation;
     private Vector3 defaultRotation;
@@ -23,10 +25,17 @@ public class Door : NetworkBehaviour
 
     public bool open { get { return isOpen; } }
 
+    [ClientRpc]
+    private void playSound()
+    {
+        audioSource.Play();
+    }
+
     void Awake()
     {
         player = GameObject.Find("LocalGamePlayer").transform;
         defaultRotation = transform.eulerAngles;
+        audioSource = GetComponent<AudioSource>();
         targetYRotation = 0.0f;
     }
 
@@ -54,7 +63,7 @@ public class Door : NetworkBehaviour
     public void ToggleDoor(Vector3 pos)
     {
         isOpen = !isOpen;
-
+        playSound();
         if (isOpen)
         {
             Vector3 dir = (pos - transform.position);

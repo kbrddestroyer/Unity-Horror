@@ -45,10 +45,11 @@ public class InventorySystem : NetworkBehaviour
         holding = item;
     }
     
-    [Command]
+    [ClientRpc]
     public void ThrowItem()
     {
-        holding.GetComponent<Rigidbody>().AddForce(holding.transform.forward * throwForce);
+        holding.GetComponent<Rigidbody>().AddForce(Camera.main.transform.forward * throwForce);
+        Debug.DrawRay(transform.position, Camera.main.transform.forward * throwForce, Color.red, 10f, true);
         holding = null;
     }
 }
