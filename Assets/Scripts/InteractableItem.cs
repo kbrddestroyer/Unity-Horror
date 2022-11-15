@@ -20,6 +20,12 @@ public abstract class InteractableItem : NetworkBehaviour
         player = GameObject.Find("LocalGamePlayer");
     }
 
+    public void MoveTo(Transform pos)
+    {
+        transform.position = pos.position;
+        transform.rotation = pos.rotation;
+    }
+
     public void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Player")

@@ -23,12 +23,17 @@ public class InventorySystem : NetworkBehaviour
         if (this.gameObject.name != "LocalGamePlayer") rootpoint = rootpoint_global;
     }
 
+    [Command]
+    private void MoveItem()
+    {
+        holding.GetComponent<InteractableItem>().MoveTo(rootpoint);
+    }
+    
     private void Update()
     {
         if (holding)
         {
-            holding.transform.position = rootpoint.position;
-            holding.transform.rotation = rootpoint.rotation;
+            MoveItem();
             if (hasAuthority)
             {
                 if (Input.GetKeyDown(KeyCode.G))
@@ -43,13 +48,18 @@ public class InventorySystem : NetworkBehaviour
     public void PickupItem(GameObject item)
     {
         holding = item;
+        holding.GetComponent<NetworkIdentity>().AssignClientAuthority(connectionToClient);
+        holding.transform.parent = rootpoint;
+        holding.GetComponent<Rigidbody>().isKinematic = true;
     }
     
-    [ClientRpc]
+    [Command]
     public void ThrowItem()
     {
+        holding.transform.parent = null;
+        holding.GetComponent<Rigidbody>().isKinematic = false;
         holding.GetComponent<Rigidbody>().AddForce(Camera.main.transform.forward * throwForce);
-        Debug.DrawRay(transform.position, Camera.main.transform.forward * throwForce, Color.red, 10f, true);
+
         holding = null;
     }
 }

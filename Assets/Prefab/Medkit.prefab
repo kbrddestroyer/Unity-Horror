@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 2020922973696420151}
   - component: {fileID: 8864053283234853375}
   m_Layer: 0
-  m_Name: Interactable
+  m_Name: Medkit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

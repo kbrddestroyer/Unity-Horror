@@ -246,6 +246,7 @@ public abstract class Anomaly : NetworkBehaviour
         transform.position = spawnPoint.position;
         transform.rotation = spawnPoint.rotation;
         agent.ResetPath();
+        animator.SetFloat("speed", 0);
         //agent.SetDestination(spawnPoint.position);
         yield return null;
     }
